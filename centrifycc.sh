@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -x
+
 ################################################################################
 #
 # Copyright 2017 Centrify Corporation
@@ -171,9 +173,9 @@ function prepare_for_cenroll()
 		fi
 	done
 
-	export PolicyFile=/tmp/.resourcepolicy.$$
-	rm -f ${PolicyFile}
-	Description="InstanceID:"$EC2_INSTANCE_ID"|InstanceType:"$EC2_INSTANCE_TYPE"|AvailabiityZone:"$EC2_AVAIL_ZONE
+	export PolicyFile="/tmp/.resourcepolicy.$$"
+
+	Description="InstanceID|"$EC2_INSTANCE_ID"|InstanceType|"$EC2_INSTANCE_TYPE"|AvailabiityZone|"$EC2_AVAIL_ZONE
 	echo "Description:"$Description >> $PolicyFile
     
 }
@@ -276,8 +278,6 @@ if [ $r -eq 0 ];then
 else
   echo "$CENTRIFY_MSG_PREX: Error in CentrifyCC deployment [exit code=$r]!"
 fi
-
-rm -f ${PolicyFile}
 
 exit $r
 
