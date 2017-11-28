@@ -128,6 +128,9 @@ function install_packages()
 
 function prepare_for_cenroll()
 {
+
+set -x
+
     r=1
     case "$CENTRIFYCC_NETWORK_ADDR_TYPE" in
     PublicIP)
@@ -180,8 +183,8 @@ function prepare_for_cenroll()
 	
 	export PolicyFile=/tmp/.resourcepolicy.$$            
 	echo "ProxyUser:cpsproxy" > $PolicyFile 
-	echo "ProxyUserPassword:"$ProxyPass > $PolicyFile 
-	echo "ProxyUserIsManaged:true" > $PolicyFile
+	echo "ProxyUserPassword:"$ProxyPass >> $PolicyFile 
+	echo "ProxyUserIsManaged:true" >> $PolicyFile
 	
 	Description="InstanceID|"$EC2_INSTANCE_ID"|InstanceType|"$EC2_INSTANCE_TYPE"|AvailabiityZone|"$EC2_AVAIL_ZONE
 	echo "Description:"$Description >> $PolicyFile
@@ -192,6 +195,8 @@ function prepare_for_cenroll()
 
 function do_cenroll()
 {
+
+set -x
      /usr/sbin/cenroll  \
           --tenant "$CENTRIFYCC_TENANT_URL" \
           --code "$CENTRIFYCC_ENROLLMENT_CODE" \
