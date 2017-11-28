@@ -143,11 +143,39 @@ function prepare_for_cenroll()
 		fi
         r=$?
         ;;
+
+    PublicDNS)
+    	CENTRIFYCC_NETWORK_ADDR=`curl --fail -s http://169.254.169.254/latest/meta-data/public-hostname`
+        r=$?
+        ;;
+
     esac
     if [ $r -ne 0 ];then
         echo "$CENTRIFY_MSG_PREX: cannot get network address for cenroll" && return $r
     fi
     return $r
+
+	# Generate some Description data on the build
+
+	EC2_INSTANCE_ID="`wget -q -O - http://169.254.169.254/latest/meta-data/instance-id`"
+	EC2_INSTANCE_TYPE="`wget -q -O - http://169.254.169.254/latest/meta-data/instance-type`"
+	EC2_AVAIL_ZONE="`wget -q -O - http://169.254.169.254/latest/meta-data/placement/availability-zone`"
+
+	VarCheckList=EC2_INSTANCE_ID EC2_INSTANCE_TYPE EC2_AVAIL_ZONE
+
+	for VarCheck in $VarCheckList;
+	do
+		if [ -z "$VarCheck" ];
+		then
+			echo $VarCheck " failed to get metadata"
+		fi
+	done
+
+	PolicyFile=/tmp/.resourcepolicy.$$
+	rm -f ${PolicyFile}
+	Description="InstanceID:"$EC2_INSTANCE_ID"|InstanceType:"$EC2_INSTANCE_TYPE"|AvailabiityZone:"$EC2_AVAIL_ZONE
+	echo "Description:"$Description >> $PolicyFile
+    
 }
 
 function do_cenroll()
@@ -159,6 +187,7 @@ function do_cenroll()
           --features "$CENTRIFYCC_FEATURES" \
           --name "$COMPUTER_NAME" \
           --address "$CENTRIFYCC_NETWORK_ADDR" \
+	  --resource-policy $PolicyFile \
           $CENTRIFYCC_CENROLL_ADDITIONAL_OPTIONS
     r=$?
     if [ $r -ne 0 ];then
@@ -248,4 +277,8 @@ else
   echo "$CENTRIFY_MSG_PREX: Error in CentrifyCC deployment [exit code=$r]!"
 fi
 
+rm -f ${PolicyFile}
+
 exit $r
+
+
