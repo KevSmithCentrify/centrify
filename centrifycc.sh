@@ -176,7 +176,7 @@ set -x
 		echo "$CENTRIFY_MSG_PREX: failed to create cpsproxy user" && return $?
 	fi
 	
-	ProxyPass=`sslpass=`openssl rand -base64 8` 
+	ProxyPass=`openssl rand -base64 8` 
 	if ! echo $ProxyPass | passwd --stdin cpsproxy;then
 		echo "$CENTRIFY_MSG_PREX: failed to set cpsproxy user password" && return $?
 	fi
