@@ -155,7 +155,6 @@ function prepare_for_cenroll()
     if [ $r -ne 0 ];then
         echo "$CENTRIFY_MSG_PREX: cannot get network address for cenroll" && return $r
     fi
-    return $r
 
 	# Generate some Description data on the build
 
@@ -173,10 +172,12 @@ function prepare_for_cenroll()
 		fi
 	done
 
-	export PolicyFile="/tmp/.resourcepolicy.$$"
+	export PolicyFile=/tmp/.resourcepolicy.$$
 
 	Description="InstanceID|"$EC2_INSTANCE_ID"|InstanceType|"$EC2_INSTANCE_TYPE"|AvailabiityZone|"$EC2_AVAIL_ZONE
 	echo "Description:"$Description >> $PolicyFile
+	
+	return $r
     
 }
 
