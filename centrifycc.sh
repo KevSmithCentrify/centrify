@@ -76,7 +76,7 @@ function check_config()
 
     CENTRIFYCC_NETWORK_ADDR_TYPE=${CENTRIFYCC_NETWORK_ADDR_TYPE:-PublicIP}
     case "$CENTRIFYCC_NETWORK_ADDR_TYPE" in
-      PublicIP|PrivateIP|HostName)
+      PublicIP|PrivateIP|HostName|PublicDNS)
         :
         ;;
       *)
