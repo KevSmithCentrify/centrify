@@ -266,7 +266,7 @@ function download_install_rpm
 
     download_url="$url_prefix/$rpm_package"
     download_dir=/tmp
-    curl --fail -o $download_dir/$rpm_package $download_url
+    curl --fail -s -o $download_dir/$rpm_package $download_url
     r=$?
     if [ $r -ne 0 ];then
         echo "$CENTRIFY_MSG_PREX: download the rpm package $rpm_package unsuccessfully"
