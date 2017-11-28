@@ -171,7 +171,7 @@ function prepare_for_cenroll()
 		fi
 	done
 
-	PolicyFile=/tmp/.resourcepolicy.$$
+	export PolicyFile=/tmp/.resourcepolicy.$$
 	rm -f ${PolicyFile}
 	Description="InstanceID:"$EC2_INSTANCE_ID"|InstanceType:"$EC2_INSTANCE_TYPE"|AvailabiityZone:"$EC2_AVAIL_ZONE
 	echo "Description:"$Description >> $PolicyFile
