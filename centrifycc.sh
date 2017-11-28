@@ -138,6 +138,10 @@ function prepare_for_cenroll()
         CENTRIFYCC_NETWORK_ADDR=`curl --fail -s http://169.254.169.254/latest/meta-data/local-ipv4`
         r=$?
         ;;
+    PublicDNS)
+    	CENTRIFYCC_NETWORK_ADDR=`curl --fail -s http://169.254.169.254/latest/meta-data/public-hostname`
+        r=$?
+        ;;
     HostName)
         CENTRIFYCC_NETWORK_ADDR=`hostname --fqdn`
 		if [ "$CENTRIFYCC_NETWORK_ADDR" = "" ] ; then
@@ -145,16 +149,7 @@ function prepare_for_cenroll()
 		fi
         r=$?
         ;;
-
-    PublicDNS)
-    	CENTRIFYCC_NETWORK_ADDR=`curl --fail -s http://169.254.169.254/latest/meta-data/public-hostname`
-        r=$?
-        ;;
-
     esac
-    if [ $r -ne 0 ];then
-        echo "$CENTRIFY_MSG_PREX: cannot get network address for cenroll" && return $r
-    fi
 
 	# Generate some Description data on the build
 
@@ -174,13 +169,13 @@ function prepare_for_cenroll()
 	
 	if ! groupadd -g 600 cpsproxy;then
 		echo "$CENTRIFY_MSG_PREX: failed to create cpsproxy group" && return $?
-	elsf ! useradd -g cpsproxy -d /home/cpsproxy -c 'Centrify Proxy Account' -m -u 6000 cpsproxy;then
+	elif ! useradd -g cpsproxy -d /home/cpsproxy -c 'Centrify Proxy Account' -m -u 6000 cpsproxy;then
 		echo "$CENTRIFY_MSG_PREX: failed to create cpsproxy user" && return $?
 	fi
 	
 	ProxyPass=`sslpass=`openssl rand -base64 8` 
 	if ! echo $ProxyPass | passwd --stdin cpsproxy;then
-		echo "$CENTRIFY_MSG_PREX: failed to set cpsproxy user password@ && return $?
+		echo "$CENTRIFY_MSG_PREX: failed to set cpsproxy user password" && return $?
 	fi
 	
 	export PolicyFile=/tmp/.resourcepolicy.$$            
