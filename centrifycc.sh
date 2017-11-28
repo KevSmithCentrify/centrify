@@ -171,9 +171,23 @@ function prepare_for_cenroll()
 			echo $VarCheck " failed to get metadata"
 		fi
 	done
-
-	export PolicyFile=/tmp/.resourcepolicy.$$
-
+	
+	if ! groupadd -g 600 cpsproxy;then
+		echo "$CENTRIFY_MSG_PREX: failed to create cpsproxy group" && return $?
+	elsf ! useradd -g cpsproxy -d /home/cpsproxy -c 'Centrify Proxy Account' -m -u 6000 cpsproxy;then
+		echo "$CENTRIFY_MSG_PREX: failed to create cpsproxy user" && return $?
+	fi
+	
+	ProxyPass=`sslpass=`openssl rand -base64 8` 
+	if ! echo $ProxyPass | passwd --stdin cpsproxy;then
+		echo "$CENTRIFY_MSG_PREX: failed to set cpsproxy user password@ && return $?
+	fi
+	
+	export PolicyFile=/tmp/.resourcepolicy.$$            
+	echo "ProxyUser:cpsproxy" > $PolicyFile 
+	echo "ProxyUserPassword:"$ProxyPass > $PolicyFile 
+	echo "ProxyUserIsManaged:true" > $PolicyFile
+	
 	Description="InstanceID|"$EC2_INSTANCE_ID"|InstanceType|"$EC2_INSTANCE_TYPE"|AvailabiityZone|"$EC2_AVAIL_ZONE
 	echo "Description:"$Description >> $PolicyFile
 	
