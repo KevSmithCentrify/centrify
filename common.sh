@@ -571,7 +571,7 @@ function enable_sshd_password_auth()
     if [ "$ssh_from" != "" ];then
         [ ! -f $backup_conf ] && cp $src_conf $backup_conf
         /bin/sed -i -r 's/^PasswordAuthentication[[:space:]]+no[[:space:]]*$/#PasswordAuthentication no/g' $src_conf
-        /bin/sed -i -r 's/^PermitRootLogin[[:space:]]+forced-commands-only[[:space:]]*$/PermitRootLogin no/g' $src_conf
+        /bin/sed -i -r 's/^PermitRootLogin[[:space:]]+forced-commands-only[[:space:]]*$/PermitRootLogin yes/g' $src_conf
         r=$?
         if [ $r -ne 0 ];then
             echo "$CENTRIFY_MSG_PREX: Comment PasswordAuthentication/PermitRootLogin in $src_conf failed!" 
