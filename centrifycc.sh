@@ -152,13 +152,14 @@ function prepare_for_cenroll()
 
 function do_cenroll()
 {
-     /usr/sbin/cenroll  \
+          /usr/sbin/cenroll  \
           --tenant "$CENTRIFYCC_TENANT_URL" \
           --code "$CENTRIFYCC_ENROLLMENT_CODE" \
           --agentauth "$CENTRIFYCC_AGENT_AUTH_ROLES" \
           --features "$CENTRIFYCC_FEATURES" \
           --name "$COMPUTER_NAME" \
           --address "$CENTRIFYCC_NETWORK_ADDR" \
+	  --resource-setting "$CENTRIFYCC_RESOURCE_SETTING" \
           $CENTRIFYCC_CENROLL_ADDITIONAL_OPTIONS
     r=$?
     if [ $r -ne 0 ];then
