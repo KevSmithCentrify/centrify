@@ -159,7 +159,6 @@ function do_cenroll()
           --features "$CENTRIFYCC_FEATURES" \
           --name "$COMPUTER_NAME" \
           --address "$CENTRIFYCC_NETWORK_ADDR" \
-	  --resource-setting "$CENTRIFYCC_RESOURCE_SETTING" \
           $CENTRIFYCC_CENROLL_ADDITIONAL_OPTIONS
     r=$?
     if [ $r -ne 0 ];then
