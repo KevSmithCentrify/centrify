@@ -244,6 +244,12 @@ start_deploy
 r=$?
 if [ $r -eq 0 ];then
   echo "$CENTRIFY_MSG_PREX: CentrifyCC successfully deployed!"
+  
+   # Set ChallengeResponseAuthentication required for AgentAuth with OEM SSHD
+   sed -i 's/ChallengeResponseAuthentication no/\#ChallengeResponseAuthentication no/g' /etc/ssh/sshd_config
+   sed -i 's/\#ChallengeResponseAuthentication yes/\ChallengeResponseAuthentication yes/g' /etc/ssh/sshd_config
+   service sshd reload 
+   
 else
   echo "$CENTRIFY_MSG_PREX: Error in CentrifyCC deployment [exit code=$r]!"
 fi
