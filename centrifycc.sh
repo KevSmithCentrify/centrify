@@ -2,7 +2,7 @@
 
 ################################################################################
 #
-# Copyright 2017 Centrify Corporation
+# Copyright 2017-2018 Centrify Corporation
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,23 +16,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# Sample script for AWS automation orchestration with CentrifyCC
+# Sample script for AWS autoscaling orchestration with CentrifyCC
 #
 #
 # This sample script is to demonstrate how AWS instances can be orchestrated to
 # cenroll Centrify identity platform through Centrify agent for Linux.
 #
 # This script is tested on AWS Autoscaling using the following EC2 AMIs:
-# - Red Hat Enterprise Linux 6.5                        32bit
-# - Red Hat Enterprise Linux 6.5                        x86_64
-# - Red Hat Enterprise Linux 7.3                        x86_64
-# - Ubuntu Server 14.04                                 32bit
-# - Ubuntu Server 14.04 LTS (HVM), SSD Volume Type      x86_64
-# - Ubuntu Server 16.04 LTS (HVM), SSD Volume Type      x86_64
-# - Amazon Linux AMI 2014.09                            32bit
-# - Amazon Linux AMI 2016.09.1.20161221 HVM             x86_64
-# - Amazon Linux AMI 2016.09.1.20161221  PV             x86_64
-# - CentOS 7.2                                          x86_64
+# - Red Hat Enterprise Linux 7.5                        x86_64
+# - Ubuntu Server 14.04 LTS (HVM                        x86_64
+# - Ubuntu Server 16.04 LTS (HVM)                       x86_64
+# - Ubuntu Server 18.04 LTS (HVM)                       x86_64
+# - Amazon Linux AMI 2018.03.0 (HVM)                    x86_64
+# - Amazon Linux 2 LTS Candidate AMI (HVM)              x86_64
+# - CentOS 7 HVM                                        x86_64
 # - SUSE Linux Enterprise Server 11 SP4 (PV)            x86_64
 # - SUSE Linux Enterprise Server 12 SP2 (HVM)           x86_64
 #
@@ -69,8 +66,8 @@ function check_config()
         return 1
     fi
 
-    if [ "$CENTRIFYCC_AGENT_AUTH_ROLES" = "" ];then
-        echo "$CENTRIFY_MSG_PREX: must specify CENTRIFYCC_AGENT_AUTH_ROLES!" 
+    if [[ "$CENTRIFYCC_AGENT_AUTH_ROLES" = "" && "$CENTRIFYCC_AGENT_SETS" = "" ]];then
+        echo "$CENTRIFY_MSG_PREX: must specify CENTRIFYCC_AGENT_AUTH_ROLES or CENTRIFY_CC_AGENT_SETS!" 
         return 1
     fi
 
@@ -152,14 +149,40 @@ function prepare_for_cenroll()
 
 function do_cenroll()
 {
-          /usr/sbin/cenroll  \
+	# set up optional parameter string.
+	# Note that login roles and sets are optional, but at least one must be required
+	#
+	CMDPARAM=()
+	if [ "$CENTRIFYCC_AGENT_AUTH_ROLES" != "" ] ; then
+	  CMDPARAM=("--agentauth" "$CENTRIFYCC_AGENT_AUTH_ROLES")
+	  # grant permssion to view
+	  IFS=","
+	  for role in $CENTRIFYCC_AGENT_AUTH_ROLES
+	  do
+	    CMDPARAM=("${CMDPARAM[@]}" "--resource-permission" "role:$role:View")
+	  done
+	fi
+	
+	# set up add to set
+	if [ "$CENTRIFYCC_AGENT_SETS" != "" ] ; then 
+	   CMDPARAM=("${CMDPARAM[@]}" "--resource-set" "${CENTRIFYCC_AGENT_SETS[@]}")
+	fi
+	
+	# for additional options, need to parse into array
+	if [ "$CENTRIFYCC_CENROLL_ADDITIONAL_OPTIONS" != "" ] ; then
+	  IFS=' ' read -a tempoption <<< "${CENTRIFYCC_CENROLL_ADDITIONAL_OPTIONS}"
+	  CMDPARAM=("${CMDPARAM[@]}" "${tempoption[@]}")
+	fi
+	
+	echo "cenroll parameters: [${CMDPARAM[@]}]"
+	  
+     /usr/sbin/cenroll  \
           --tenant "$CENTRIFYCC_TENANT_URL" \
           --code "$CENTRIFYCC_ENROLLMENT_CODE" \
-          --agentauth "$CENTRIFYCC_AGENT_AUTH_ROLES" \
           --features "$CENTRIFYCC_FEATURES" \
           --name "$COMPUTER_NAME" \
           --address "$CENTRIFYCC_NETWORK_ADDR" \
-          $CENTRIFYCC_CENROLL_ADDITIONAL_OPTIONS
+          "${CMDPARAM[@]}"
     r=$?
     if [ $r -ne 0 ];then
         echo "$CENTRIFY_MSG_PREX: cenroll failed!" 
@@ -205,7 +228,10 @@ function start_deploy()
   
     enable_sshd_password_auth
     r=$? && [ $r -ne 0 ] && return $r
-  
+    
+    enable_sshd_challenge_response_auth
+    r=$? && [ $r -ne 0 ] && return $r
+    
     prepare_for_cenroll
     r=$? && [ $r -ne 0 ] && return $r
   
@@ -228,7 +254,7 @@ detect_os
 r=$? 
 [ $r -ne 0 ] && echo "$CENTRIFY_MSG_PREX: detect OS failed  [exit code=$r]" && exit $r
 
-check_supported_os centrifycc not_support_ssm
+check_supported_os centrifycc support_ssm
 r=$? 
 [ $r -ne 0 ] && echo "$CENTRIFY_MSG_PREX: current OS is not supported [exit code=$r]" && exit $r
 
@@ -244,12 +270,6 @@ start_deploy
 r=$?
 if [ $r -eq 0 ];then
   echo "$CENTRIFY_MSG_PREX: CentrifyCC successfully deployed!"
-  
-   # Set ChallengeResponseAuthentication required for AgentAuth with OEM SSHD
-   sed -i 's/ChallengeResponseAuthentication no/\#ChallengeResponseAuthentication no/g' /etc/ssh/sshd_config
-   sed -i 's/\#ChallengeResponseAuthentication yes/\ChallengeResponseAuthentication yes/g' /etc/ssh/sshd_config
-   service sshd reload 
-   
 else
   echo "$CENTRIFY_MSG_PREX: Error in CentrifyCC deployment [exit code=$r]!"
 fi
