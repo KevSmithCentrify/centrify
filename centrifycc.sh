@@ -120,6 +120,20 @@ function install_packages()
     return $r
 }
 
+function do_ssh_config()
+{
+        curl --fail -o /etc/ssh/centrify_tenant_ca.pub https://"$CENTRIFYCC_TENANT_URL"/servermanage/getmastersshkey
+        r=$? 
+        if [ $r -ne 0 ];then
+            echo "$CENTRIFY_MSG_PREX: cannot get tenant public key for ssh" && return $r
+        else
+            chmod 400 /etc/ssh/centrify_tenant_ca.pub
+            echo "TrustedUserCAKeys /etc/ssh/centrify_tenant_ca.pub" >> /etc/ssh/sshd_config
+            service sshd restart
+        fi
+        [ $r -ne 0 ] && return $r
+}
+
 
 function prepare_for_cenroll()
 {
@@ -232,6 +246,9 @@ function start_deploy()
     enable_sshd_challenge_response_auth
     r=$? && [ $r -ne 0 ] && return $r
     
+    do_ssh_config
+    r=$? && [ $r -ne 0 ] && return $r
+
     prepare_for_cenroll
     r=$? && [ $r -ne 0 ] && return $r
   
