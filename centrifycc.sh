@@ -131,7 +131,6 @@ function do_ssh_config()
             echo "TrustedUserCAKeys /etc/ssh/centrify_tenant_ca.pub" >> /etc/ssh/sshd_config
             service sshd restart
         fi
-        [ $r -ne 0 ] && return $r
 }
 
 
