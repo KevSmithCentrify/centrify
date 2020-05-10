@@ -128,8 +128,9 @@ function do_ssh_config()
             echo "$CENTRIFY_MSG_PREX: cannot get tenant public key for ssh" && return $r
         else
             chmod 400 /etc/ssh/centrify_tenant_ca.pub
-	    echo "\n#Centrify SSH Cert Authentication" >> /etc/ssh/sshd_config
-            echo "\nTrustedUserCAKeys /etc/ssh/centrify_tenant_ca.pub" >> /etc/ssh/sshd_config
+	    printf '\n%s\n' "#Centrify SSH Cert Authentication" >> /etc/ssh/sshd_config
+            printf '%s\n' "TrustedUserCAKeys /etc/ssh/centrify_tenant_ca.pub" >> /etc/ssh/sshd_config
+	    printf '%s\n' "Configured centrify_tenant_ca.pub"
             service sshd restart
         fi
 }
