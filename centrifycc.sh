@@ -2,7 +2,7 @@
 
 ################################################################################
 #
-# Copyright 2017-2018 Centrify Corporation
+# Copyright 2017-2020 Centrify Corporation
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -208,6 +208,34 @@ function do_cenroll()
     if [ $r -ne 0 ];then 
         echo "$CENTRIFY_MSG_PREX: cinfo failed after cenroll!" 
     fi
+    
+    state=`cinfo -A`
+    
+    if [ $state != "connected" ]
+    	for i in {1..5}
+    	do
+    		sleep 5
+		state=`cinfo -A`
+		if [ $state == "connected" ]
+			return 0
+		fi
+	done
+     fi
+     
+     state=`cinfo -A`
+     
+     if [ $state != "connected" ]
+     	echo "agent has failed to connect at this point. Status: "$state
+     	echo "forcing service restart"
+	/opt/centrify/sbin/cagent stop
+	sleep 5
+        /opt/centrify/sbin/cagent start
+	r=$?
+	if [ $r -ne 0 ];then 
+        	echo "$CENTRIFY_MSG_PREX: cagent failed to start - FATAL" 
+		return $r
+    	fi
+     fi
 
     return $r
 }
