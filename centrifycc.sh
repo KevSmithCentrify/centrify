@@ -203,7 +203,7 @@ function do_cenroll()
         echo "$CENTRIFY_MSG_PREX: cenroll failed!" 
         return $r
     fi
-    /usr/bin/cinfo
+    /usr/bin/cinfo -V
     r=$?
     if [ $r -ne 0 ];then 
         echo "$CENTRIFY_MSG_PREX: cinfo failed after cenroll!" 
