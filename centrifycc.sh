@@ -290,6 +290,5 @@ if [ $r -eq 0 ];then
   echo "$CENTRIFY_MSG_PREX: CentrifyCC successfully deployed!"
 else
   echo "$CENTRIFY_MSG_PREX: Error in CentrifyCC deployment [exit code=$r]!"
+  exit $r
 fi
-
-exit $r
