@@ -197,13 +197,17 @@ function do_cenroll()
           --features "$CENTRIFYCC_FEATURES" \
           --name "$COMPUTER_NAME" \
           --address "$CENTRIFYCC_NETWORK_ADDR" \
+	  --force \
           "${CMDPARAM[@]}"
     r=$?
     if [ $r -ne 0 ];then
         echo "$CENTRIFY_MSG_PREX: cenroll failed!" 
+	/usr/bin/cinfo -V
         return $r
+    else
+    	/usr/bin/cinfo -V
     fi
-    /usr/bin/cinfo -V
+    
     r=$?
     if [ $r -ne 0 ];then 
         echo "$CENTRIFY_MSG_PREX: cinfo failed after cenroll!" 
