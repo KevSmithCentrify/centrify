@@ -612,8 +612,8 @@ function enable_sshd_password_auth()
 	
 	# Include code to remove AWS AuthKeys settings - Aug 2020
         /bin/sed -i -r 's/^PasswordAuthentication[[:space:]]+no[[:space:]]*$/#PasswordAuthentication no/g' $src_conf
-	/bin/sed -i '^AuthorizedKeysCommand/d' $src_conf
-	/bin/sed -i '^AuthorizedKeysCommandUser/d' $src_conf
+	/bin/sed -i '/AuthorizedKeysCommand/d' $src_conf
+	/bin/sed -i '/AuthorizedKeysCommandUser/d' $src_conf
 	
         r=$?
         if [ $r -ne 0 ];then
