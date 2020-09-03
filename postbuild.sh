@@ -188,6 +188,12 @@ done
 
 # Set GB TimeZone
 
+echo 'postbuild: setting GB TimeZone in /etc/sysconfig/clock' >> $centrifycc_deploy_dir/deploy.log 2>&1
+/bin/sed -i -r 's/ZONE="UTC"/ZONE="GB"/g' /etc/sysconfig/clock >> $centrifycc_deploy_dir/deploy.log 2>&1
 
+echo 'postbuild: symbolically linking /usr/share/zoneinfo/GB /etc/localtime' >> $centrifycc_deploy_dir/deploy.log 2>&1
+ln -sf /usr/share/zoneinfo/GB /etc/localtime >> $centrifycc_deploy_dir/deploy.log 2>&1
+
+# what next - docs say a reboot - WTF
 
 echo 'postbuild: completed OK' >> $centrifycc_deploy_dir/deploy.log 2>&1
