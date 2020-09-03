@@ -161,7 +161,7 @@ SudoID=$(${CENTRIFY_CCLI_BIN} /Redrock/query -s -m -ms postbuild -j "{ 'Script':
 
 shopt -s nocasematch
   [[ "${RepoID}" =~ .*"null".* ]] && echo 'failed to get centrify.repo secret ID from PAS DB - ccli returned ['${RepoID}']' >> $centrifycc_deploy_dir/deploy.log 2>&1 
-  [[ "${SudoID}" == *"null"* ]] && echo 'failed to get centrify.sudo secret ID from PAS DB - ccli returned ['${SudoID}']' >> $centrifycc_deploy_dir/deploy.log 2>&1 
+  [[ "${SudoID}" =~ .*"null".* ]] && echo 'failed to get centrify.sudo secret ID from PAS DB - ccli returned ['${SudoID}']' >> $centrifycc_deploy_dir/deploy.log 2>&1 
 shopt -u nocasematch
 
 if ! ${CENTRIFY_CCLI_BIN} /ServerManage/RetrieveSecretContents -s -m -ms postbuild -j "{'ID': '$RepoID'}" | jq -r '.Result | .SecretText' > /etc/yum.repos.d/centrify.repo;
@@ -185,5 +185,9 @@ do
   chown root:root $FileName >> $centrifycc_deploy_dir/deploy.log 2>&1
   chmod 640 $FileName >> $centrifycc_deploy_dir/deploy.log 2>&1
 done
+
+# Set GB TimeZone
+
+
 
 echo 'postbuild: completed OK' >> $centrifycc_deploy_dir/deploy.log 2>&1
