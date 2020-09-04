@@ -194,6 +194,4 @@ echo 'postbuild: setting GB TimeZone in /etc/sysconfig/clock' >> $centrifycc_dep
 echo 'postbuild: symbolically linking /usr/share/zoneinfo/GB /etc/localtime' >> $centrifycc_deploy_dir/deploy.log 2>&1
 ln -sf /usr/share/zoneinfo/GB /etc/localtime >> $centrifycc_deploy_dir/deploy.log 2>&1
 
-# what next - docs say a reboot - WTF
-
 echo 'postbuild: completed OK' >> $centrifycc_deploy_dir/deploy.log 2>&1
