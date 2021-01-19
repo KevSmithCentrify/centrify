@@ -226,15 +226,20 @@ else
     echo 'postbuild: creation of ~root/.aws/config failed' >> $centrifycc_deploy_dir/deploy.log 2>&1;exit 1
 fi
 
-# Write aws cli credentials from PAS secrets
+# Write aws cli credentials from PAS secrets, notify slack channel
 
 AWSAccessKeyID=$(${CENTRIFY_CCLI_BIN} /Redrock/query -s -m -ms postbuild -j "{ 'Script':'select DataVault.ID,DataVault.SecretName from DataVault where DataVault.SecretName = \'AWS-AccessKeyID\' ' }" | jq -r '.Result.Results [] | .Row | .ID')
 AWSSecretAccessKey=$(${CENTRIFY_CCLI_BIN} /Redrock/query -s -m -ms postbuild -j "{ 'Script':'select DataVault.ID,DataVault.SecretName from DataVault where DataVault.SecretName = \'AWS-SecretAccessKey\' ' }" | jq -r '.Result.Results [] | .Row | .ID')
+SlackURLID=$(${CENTRIFY_CCLI_BIN} /Redrock/query -s -m -ms postbuild -j "{ 'Script':'select DataVault.ID,DataVault.SecretName from DataVault where DataVault.SecretName = \'SlackURL\' ' }" | jq -r '.Result.Results [] | .Row | .ID')
 
 shopt -s nocasematch
-  [[ "${AWSAccessKey}" =~ .*"null".* ]] && echo 'failed to get AWS-AccessKey secret ID from PAS DB - ccli returned ['${AWSAccessKey}']' >> $centrifycc_deploy_dir/deploy.log 2>&1 
-  [[ "${AWSSecretAccessKey}" =~ .*"null".* ]] && echo 'failed to get AWS-SecretAccessKey secret ID from PAS DB - ccli returned ['${AWSSecretAccessKey}']' >> $centrifycc_deploy_dir/deploy.log 2>&1 
+  [[ "${AWSAccessKey}" =~ .*"null".* ]] && echo 'postbuild: failed to get AWS-AccessKey secret ID from PAS DB - ccli returned ['${AWSAccessKey}']' >> $centrifycc_deploy_dir/deploy.log 2>&1 
+  [[ "${AWSSecretAccessKey}" =~ .*"null".* ]] && echo 'postbuild: failed to get AWS-SecretAccessKey secret ID from PAS DB - ccli returned ['${AWSSecretAccessKey}']' >> $centrifycc_deploy_dir/deploy.log 2>&1 
+  [[ "${SlackURLID}" =~ .*"null".* ]] && echo 'postbuild: failed to get SlackURL secret ID from PAS DB - ccli returned ['${SlackURLID}']' >> $centrifycc_deploy_dir/deploy.log 2>&1 
 shopt -u nocasematch
+
+SlackURL=$(${CENTRIFY_CCLI_BIN} /ServerManage/RetrieveSecretContents -s -m -ms postbuild -j "{'ID': '$SlackURLID'}" | jq -r '.Result | .SecretText')
+[[ "$SlackURL" != *"https"* ]] && echo 'postbuild: failed to get SlackURL from PAS secret - ccli returned ['${SlackURL}']' >> $centrifycc_deploy_dir/deploy.log 2>&1;exit 1
 
 if ! echo "[default]" > ~root/.aws/credentials
 then
@@ -242,7 +247,7 @@ then
 else
     echo 'postbuild: ~root/.aws/credentials created OK' >> $centrifycc_deploy_dir/deploy.log 2>&1
     chmod 400 ~root/.aws/credentials
-    
+
     if ! ${CENTRIFY_CCLI_BIN} /ServerManage/RetrieveSecretContents -s -m -ms postbuild -j "{'ID': '$AWSAccessKey'}" | jq -r '.Result | .SecretText' >> ~root/.aws/credentials
     then
         echo 'postbuild: failed to write AWS AccessKey ID to ~root/.aws/credentials' >> $centrifycc_deploy_dir/deploy.log 2>&1;exit 1
@@ -259,5 +264,7 @@ else
         echo 'postbuild: aws cli wrote EC2 SSM tag on $InstanceID' >> $centrifycc_deploy_dir/deploy.log 2>&1
     fi
 fi
+
+curl -X POST -H 'Content-type: application/json' --data '{"text":"AWS instance '${InstanceID}' has been enrolled in PAS Vault"}' ${SlackURL}
 
 echo 'postbuild: completed OK' >> $centrifycc_deploy_dir/deploy.log 2>&1
