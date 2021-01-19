@@ -202,7 +202,7 @@ ln -sf /usr/share/zoneinfo/GB /etc/localtime >> $centrifycc_deploy_dir/deploy.lo
 echo 'postbuild: writing SSM tag to instance' >> $centrifycc_deploy_dir/deploy.log 2>&1
 
 InstanceID=$(curl --fail -s http://169.254.169.254/latest/meta-data/instance-id)
-[[ -z ${InstanceID} ]] && echo 'postbuild: instanceID is null, check http://169.254.169.254/latest/meta-data/instance-id' >> $centrifycc_deploy_dir/deploy.log 2>&1
+[[ -z ${InstanceID}]] && echo 'postbuild: instanceID is null, check http://169.254.169.254/latest/meta-data/instance-id' >> $centrifycc_deploy_dir/deploy.log 2>&1
 
 if ! mkdir -m 700 ~root/.aws;
 then
@@ -242,6 +242,7 @@ then
 else
     echo 'postbuild: ~root/.aws/credentials created OK' >> $centrifycc_deploy_dir/deploy.log 2>&1
     chmod 400 ~root/.aws/credentials
+    
     if ! ${CENTRIFY_CCLI_BIN} /ServerManage/RetrieveSecretContents -s -m -ms postbuild -j "{'ID': '$AWSAccessKey'}" | jq -r '.Result | .SecretText' >> ~root/.aws/credentials
     then
         echo 'postbuild: failed to write AWS AccessKey ID to ~root/.aws/credentials' >> $centrifycc_deploy_dir/deploy.log 2>&1;exit 1
@@ -250,7 +251,7 @@ else
             echo 'postbuild: failed to write AWS AccessKey ID to ~root/.aws/credentials' >> $centrifycc_deploy_dir/deploy.log 2>&1;exit 1
         fi
     fi
-else
+
     CheckSum=$(md5sum ~root/.aws/credentials | awk '{print $1}')
     [[ -z "$CheckSum"]] && echo 'postbuild: could not md5sum ~root/.aws/credentials $CheckSum' >> $centrifycc_deploy_dir/deploy.log 2>&1
     [[ "$CheckSum" -ne "c3022e6375f3c86a83880eddac86398c" ]] && echo 'postbuild: checksum validation on ~root/.aws/credentials failed' >> $centrifycc_deploy_dir/deploy.log 2>&1;exit 1
