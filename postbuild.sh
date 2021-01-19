@@ -252,10 +252,6 @@ else
         fi
     fi
 
-    CheckSum=$(md5sum ~root/.aws/credentials | awk '{print $1}')
-    [[ -z "$CheckSum" ]] && echo 'postbuild: could not md5sum ~root/.aws/credentials $CheckSum' >> $centrifycc_deploy_dir/deploy.log 2>&1
-    [[ "$CheckSum" -ne "c3022e6375f3c86a83880eddac86398c" ]] && echo 'postbuild: checksum validation on ~root/.aws/credentials failed' >> $centrifycc_deploy_dir/deploy.log 2>&1;exit 1
-
     if ! aws ec2 create-tags --resources $InstanceID --tags Key=ASGroup,value=CentrifyUnix >> $centrifycc_deploy_dir/deploy.log 2>&1;
     then
         echo 'postbuild: aws cli failed to write EC2 SSM tag on $InstanceID [Key=ASGroup,value=CentrifyUnix]' >> $centrifycc_deploy_dir/deploy.log 2>&1;exit 1
