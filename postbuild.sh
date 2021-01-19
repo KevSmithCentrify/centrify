@@ -239,7 +239,7 @@ shopt -s nocasematch
 shopt -u nocasematch
 
 SlackURL=$(${CENTRIFY_CCLI_BIN} /ServerManage/RetrieveSecretContents -s -m -ms postbuild -j "{'ID': '$SlackURLID'}" | jq -r '.Result | .SecretText')
-[[ "$SlackURL" != *"https"* ]] && echo 'postbuild: failed to get SlackURL from PAS secret - ccli returned ['${SlackURL}']' >> $centrifycc_deploy_dir/deploy.log 2>&1;exit 1
+[[ "$SlackURL" != *"https"* ]] && echo 'postbuild: failed to get SlackURL from PAS secret - ccli returned ['${SlackURL}']' >> $centrifycc_deploy_dir/deploy.log 2>&1
 
 if ! echo "[default]" > ~root/.aws/credentials
 then
@@ -265,6 +265,6 @@ else
     fi
 fi
 
-curl -X POST -H 'Content-type: application/json' --data '{"text":"AWS autoscaling: '${InstanceID}' has been enrolled in PAS Vault"}' ${SlackURL}
+curl -X POST -H 'Content-type: application/json' --data '{"text":"AWS instance '${InstanceID}' has been enrolled in PAS Vault"}' ${SlackURL}
 
 echo 'postbuild: completed OK' >> $centrifycc_deploy_dir/deploy.log 2>&1
