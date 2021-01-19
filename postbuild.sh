@@ -202,7 +202,7 @@ ln -sf /usr/share/zoneinfo/GB /etc/localtime >> $centrifycc_deploy_dir/deploy.lo
 echo 'postbuild: writing SSM tag to instance' >> $centrifycc_deploy_dir/deploy.log 2>&1
 
 InstanceID=$(curl --fail -s http://169.254.169.254/latest/meta-data/instance-id)
-[[ -z ${InstanceID}]] && echo 'postbuild: instanceID is null, check http://169.254.169.254/latest/meta-data/instance-id' >> $centrifycc_deploy_dir/deploy.log 2>&1
+[[ -z ${InstanceID} ]] && echo 'postbuild: instanceID is null, check http://169.254.169.254/latest/meta-data/instance-id' >> $centrifycc_deploy_dir/deploy.log 2>&1
 
 if ! mkdir -m 700 ~root/.aws;
 then
