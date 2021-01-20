@@ -136,6 +136,18 @@ else
   echo "postbuild: ccli initialization starts" >> $centrifycc_deploy_dir/deploy.log 2>&1
   ${CENTRIFY_CCLI_BIN} -url https://${CENTRIFYCC_TENANT_URL} saveconfig >> $centrifycc_deploy_dir/deploy.log 2>&1 
   rm -f ${CENTRIFY_CCLI_DL}
+  
+  # Kludge as there is no way to write the ccli saveconfig to an alternate directory
+  
+  if ! mv /centrifycli.config /root/centrifycli.config;
+  then
+      echo "postbuild: unable to mv /centrifycli.config /root/centrifycli.config; " >> $centrifycc_deploy_dir/deploy.log 2>&1
+  else
+      echo "postbuild: centrifycli.config relocated to root homedir" >> $centrifycc_deploy_dir/deploy.log 2>&1
+  fi
+  
+  # end Kludge
+  
   echo "postbuild: ccli initialization completed" >> $centrifycc_deploy_dir/deploy.log 2>&1
 fi
 
