@@ -245,9 +245,14 @@ if ! echo "[default]" > ~root/.aws/credentials
 then
     echo 'postbuild: creation of ~root/.aws/credentials failed' >> $centrifycc_deploy_dir/deploy.log 2>&1;exit 1
 else
-    echo 'postbuild: ~root/.aws/credentials created OK' >> $centrifycc_deploy_dir/deploy.log 2>&1
-    chmod 400 ~root/.aws/credentials
-
+    if grep -q null ~root/.aws/credentials;
+    then
+        echo 'postbuild: ~root/.aws/credentials failed to create properly, suspect API call' >> $centrifycc_deploy_dir/deploy.log 2>&1;exit 1
+    else
+        echo 'postbuild: ~root/.aws/credentials created OK' >> $centrifycc_deploy_dir/deploy.log 2>&1
+        chmod 400 ~root/.aws/credentials
+    fi
+    
     if ! ${CENTRIFY_CCLI_BIN} /ServerManage/RetrieveSecretContents -s -m -ms postbuild -j "{'ID': '$AWSAccessKey'}" | jq -r '.Result | .SecretText' >> ~root/.aws/credentials
     then
         echo 'postbuild: failed to write AWS AccessKey ID to ~root/.aws/credentials' >> $centrifycc_deploy_dir/deploy.log 2>&1;exit 1
