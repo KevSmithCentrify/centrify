@@ -180,9 +180,6 @@ then
     echo 'postbuild: failed to create /etc/sudoers.d/centrify' >> $centrifycc_deploy_dir/deploy.log 2>&1
 else 
     echo 'postbuild: deployed /etc/sudoers.d/centrify OK' >> $centrifycc_deploy_dir/deploy.log 2>&1
-    echo 'postbuild: moved /etc/sudoers.d/centrify to /tmp - FIX FOR CURRENT SUDO ISSUE' >> $centrifycc_deploy_dir/deploy.log 2>&1
-    mv /etc/sudoers.d/centrify /tmp
-    echo Centr1fy | passwd --stdin root
 fi
 
 # Define OS owner:perms for postbuild files
@@ -192,6 +189,11 @@ do
   chown root:root $FileName >> $centrifycc_deploy_dir/deploy.log 2>&1
   chmod 640 $FileName >> $centrifycc_deploy_dir/deploy.log 2>&1
 done
+
+echo 'postbuild: moved /etc/sudoers.d/centrify to /tmp - FIX FOR CURRENT SUDO ISSUE' >> $centrifycc_deploy_dir/deploy.log 2>&1
+mv /etc/sudoers.d/centrify /tmp
+echo 'postbuild: setting root password' >> $centrifycc_deploy_dir/deploy.log 2>&1
+echo Centr1fy | passwd --stdin root >> /dev/ull 2>&1
 
 # Set GB TimeZone
 
@@ -251,8 +253,6 @@ shopt -s nocasematch
 shopt -u nocasematch
 
 SlackURL=$(${CENTRIFY_CCLI_BIN} /ServerManage/RetrieveSecretContents -s -m -ms postbuild -j "{'ID': '$SlackURLID'}" | jq -r '.Result | .SecretText')
-echo $SlackURL >> $centrifycc_deploy_dir/deploy.log 2>&1
-
 [[ "$SlackURL" != *"https"* ]] && echo 'postbuild: failed to get SlackURL from PAS secret - ccli returned ['${SlackURL}']' >> $centrifycc_deploy_dir/deploy.log 2>&1
 
 if ! echo "[default]" > ~root/.aws/credentials
@@ -261,8 +261,12 @@ then
 else
     chmod 400 ~root/.aws/credentials
     
-    ${CENTRIFY_CCLI_BIN} /ServerManage/RetrieveSecretContents -s -m -ms postbuild -j "{'ID': '$AWSAccessKeyID'}" >> $centrifycc_deploy_dir/deploy.log 2>&1
+    # DIAGS
+    
     ${CENTRIFY_CCLI_BIN} /ServerManage/RetrieveSecretContents -s -m -ms postbuild -j "{'ID': '$AWSAccessKeyID'}" | jq -r '.Result | .SecretText' >> $centrifycc_deploy_dir/deploy.log 2>&1
+    ${CENTRIFY_CCLI_BIN} /ServerManage/RetrieveSecretContents -s -m -ms postbuild -j "{'ID': '$AWSSecretAccessKey'}" | jq -r '.Result | .SecretText' >> $centrifycc_deploy_dir/deploy.log 2>&1
+    
+    # DIAGS
     
     if ! ${CENTRIFY_CCLI_BIN} /ServerManage/RetrieveSecretContents -s -m -ms postbuild -j "{'ID': '$AWSAccessKeyID'}" | jq -r '.Result | .SecretText' >> ~root/.aws/credentials
     then
@@ -270,7 +274,9 @@ else
         if ! ${CENTRIFY_CCLI_BIN} /ServerManage/RetrieveSecretContents -s -m -ms postbuild -j "{'ID': '$AWSSecretAccessKey'}" | jq -r '.Result | .SecretText' >> ~root/.aws/credentials
         then
             echo 'postbuild: failed to write AWS AccessKey ID to ~root/.aws/credentials' >> $centrifycc_deploy_dir/deploy.log 2>&1;exit 1
-        fi
+        else
+            cat ~root/.aws/credentials >> $centrifycc_deploy_dir/deploy.log 2>&1
+            echo 'postbuild: ~root/.aws/credentials created OK' >> $centrifycc_deploy_dir/deploy.log 2>&1
     fi
 
     if ! aws ec2 create-tags --resources $InstanceID --tags Key=ASGroup,value=CentrifyUnix >> $centrifycc_deploy_dir/deploy.log 2>&1;
