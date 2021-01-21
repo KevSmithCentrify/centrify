@@ -263,13 +263,6 @@ if ! echo "[default]" > ~root/.aws/credentials
 then
     echo 'postbuild: creation of ~root/.aws/credentials failed' >> $centrifycc_deploy_dir/deploy.log 2>&1;exit 1
 else
-    if grep -q null ~root/.aws/credentials;
-    then
-        echo 'postbuild: ~root/.aws/credentials failed to create properly, suspect API call' >> $centrifycc_deploy_dir/deploy.log 2>&1;exit 1
-    else
-        echo 'postbuild: ~root/.aws/credentials created OK' >> $centrifycc_deploy_dir/deploy.log 2>&1
-        chmod 400 ~root/.aws/credentials
-    fi
     
     ${CENTRIFY_CCLI_BIN} /ServerManage/RetrieveSecretContents -s -m -ms postbuild -j "{'ID': '$AWSAccessKey'}" >> $centrifycc_deploy_dir/deploy.log 2>&1
     ${CENTRIFY_CCLI_BIN} /ServerManage/RetrieveSecretContents -s -m -ms postbuild -j "{'ID': '$AWSAccessKey'}" | jq -r '.Result | .SecretText' >> $centrifycc_deploy_dir/deploy.log 2>&1
@@ -281,6 +274,9 @@ else
         then
             echo 'postbuild: failed to write AWS AccessKey ID to ~root/.aws/credentials' >> $centrifycc_deploy_dir/deploy.log 2>&1;exit 1
         fi
+    else
+         chmod 400 ~root/.aws/credentials
+         echo 'postbuild: creation of ~root/.aws/credentials completed OK' >> $centrifycc_deploy_dir/deploy.log 2>&1
     fi
 
     if ! aws ec2 create-tags --resources $InstanceID --tags Key=ASGroup,value=CentrifyUnix >> $centrifycc_deploy_dir/deploy.log 2>&1;
