@@ -238,10 +238,11 @@ AWSAccessKeyID=$(${CENTRIFY_CCLI_BIN} /Redrock/query -s -m -ms postbuild -j "{ '
 AWSSecretAccessKey=$(${CENTRIFY_CCLI_BIN} /Redrock/query -s -m -ms postbuild -j "{ 'Script':'select DataVault.ID,DataVault.SecretName from DataVault where DataVault.SecretName = \'AWS-SecretAccessKey\' ' }" | jq -r '.Result.Results [] | .Row | .ID')
 SlackURLID=$(${CENTRIFY_CCLI_BIN} /Redrock/query -s -m -ms postbuild -j "{ 'Script':'select DataVault.ID,DataVault.SecretName from DataVault where DataVault.SecretName = \'SlackURL\' ' }" | jq -r '.Result.Results [] | .Row | .ID')
 
-echo "vars:" >> $centrifycc_deploy_dir/deploy.log 2>&1
+echo "ID's:" >> $centrifycc_deploy_dir/deploy.log 2>&1
 echo $AWSAccessKeyID >> $centrifycc_deploy_dir/deploy.log 2>&1
 echo $AWSSecretAccessKey >> $centrifycc_deploy_dir/deploy.log 2>&1
 echo $SlackURLID >> $centrifycc_deploy_dir/deploy.log 2>&1
+echo "END ID's" >> $centrifycc_deploy_dir/deploy.log 2>&1
 
 shopt -s nocasematch
   [[ "${AWSAccessKeyID}" =~ .*"null".* ]] && echo 'postbuild: failed to get AWS-AccessKey secret ID from PAS DB - ccli returned ['${AWSAccessKeyID}']' >> $centrifycc_deploy_dir/deploy.log 2>&1 
@@ -260,10 +261,10 @@ then
 else
     chmod 400 ~root/.aws/credentials
     
-    ${CENTRIFY_CCLI_BIN} /ServerManage/RetrieveSecretContents -s -m -ms postbuild -j "{'ID': '$AWSAccessKey'}" >> $centrifycc_deploy_dir/deploy.log 2>&1
-    ${CENTRIFY_CCLI_BIN} /ServerManage/RetrieveSecretContents -s -m -ms postbuild -j "{'ID': '$AWSAccessKey'}" | jq -r '.Result | .SecretText' >> $centrifycc_deploy_dir/deploy.log 2>&1
+    ${CENTRIFY_CCLI_BIN} /ServerManage/RetrieveSecretContents -s -m -ms postbuild -j "{'ID': '$AWSAccessKeyID'}" >> $centrifycc_deploy_dir/deploy.log 2>&1
+    ${CENTRIFY_CCLI_BIN} /ServerManage/RetrieveSecretContents -s -m -ms postbuild -j "{'ID': '$AWSAccessKeyID'}" | jq -r '.Result | .SecretText' >> $centrifycc_deploy_dir/deploy.log 2>&1
     
-    if ! ${CENTRIFY_CCLI_BIN} /ServerManage/RetrieveSecretContents -s -m -ms postbuild -j "{'ID': '$AWSAccessKey'}" | jq -r '.Result | .SecretText' >> ~root/.aws/credentials
+    if ! ${CENTRIFY_CCLI_BIN} /ServerManage/RetrieveSecretContents -s -m -ms postbuild -j "{'ID': '$AWSAccessKeyID'}" | jq -r '.Result | .SecretText' >> ~root/.aws/credentials
     then
         echo 'postbuild: failed to write AWS AccessKey ID to ~root/.aws/credentials' >> $centrifycc_deploy_dir/deploy.log 2>&1;exit 1
         if ! ${CENTRIFY_CCLI_BIN} /ServerManage/RetrieveSecretContents -s -m -ms postbuild -j "{'ID': '$AWSSecretAccessKey'}" | jq -r '.Result | .SecretText' >> ~root/.aws/credentials
