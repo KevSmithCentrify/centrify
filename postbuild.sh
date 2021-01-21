@@ -254,6 +254,9 @@ shopt -s nocasematch
 shopt -u nocasematch
 
 SlackURL=$(${CENTRIFY_CCLI_BIN} /ServerManage/RetrieveSecretContents -s -m -ms postbuild -j "{'ID': '$SlackURLID'}" | jq -r '.Result | .SecretText')
+
+echo $SlackURL >> $centrifycc_deploy_dir/deploy.log 2>&1
+
 [[ "$SlackURL" != *"https"* ]] && echo 'postbuild: failed to get SlackURL from PAS secret - ccli returned ['${SlackURL}']' >> $centrifycc_deploy_dir/deploy.log 2>&1
 
 if ! echo "[default]" > ~root/.aws/credentials
@@ -267,6 +270,9 @@ else
         echo 'postbuild: ~root/.aws/credentials created OK' >> $centrifycc_deploy_dir/deploy.log 2>&1
         chmod 400 ~root/.aws/credentials
     fi
+    
+    ${CENTRIFY_CCLI_BIN} /ServerManage/RetrieveSecretContents -s -m -ms postbuild -j "{'ID': '$AWSAccessKey'}" >> $centrifycc_deploy_dir/deploy.log 2>&1
+    ${CENTRIFY_CCLI_BIN} /ServerManage/RetrieveSecretContents -s -m -ms postbuild -j "{'ID': '$AWSAccessKey'}" | jq -r '.Result | .SecretText' >> $centrifycc_deploy_dir/deploy.log 2>&1
     
     if ! ${CENTRIFY_CCLI_BIN} /ServerManage/RetrieveSecretContents -s -m -ms postbuild -j "{'ID': '$AWSAccessKey'}" | jq -r '.Result | .SecretText' >> ~root/.aws/credentials
     then
