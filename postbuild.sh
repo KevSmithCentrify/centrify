@@ -278,7 +278,7 @@ then
     echo 'postbuild: aws cli failed to write EC2 SSM tag on $InstanceID [Key=ASGroup,Value=CentrifyUnix]' >> $centrifycc_deploy_dir/deploy.log 2>&1;exit 1
 else
     echo 'postbuild: aws cli wrote EC2 SSM tag on $InstanceID' >> $centrifycc_deploy_dir/deploy.log 2>&1
-    curl -X POST -H 'Content-type: application/json' --data '{"text":"AWS instance '${InstanceID}' has been enrolled in PAS Vault"}' ${SlackURL} > dev/null 2&1
+    curl -X POST -H 'Content-type: application/json' --data '{"text":"AWS instance '${InstanceID}' has been enrolled in PAS Vault"}' ${SlackURL} > dev/null 2>&1
 fi
 
 echo 'postbuild: completed OK' >> $centrifycc_deploy_dir/deploy.log 2>&1
