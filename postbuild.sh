@@ -259,13 +259,6 @@ if ! echo "[default]" > ~root/.aws/credentials
 then
     echo 'postbuild: creation of ~root/.aws/credentials failed' >> $centrifycc_deploy_dir/deploy.log 2>&1;exit 1
 fi 
-
-# DIAGS
-
-${CENTRIFY_CCLI_BIN} /ServerManage/RetrieveSecretContents -s -m -ms postbuild -j "{'ID': '$AWSAccessKeyID'}" | jq -r '.Result | .SecretText' >> $centrifycc_deploy_dir/deploy.log 2>&1
-${CENTRIFY_CCLI_BIN} /ServerManage/RetrieveSecretContents -s -m -ms postbuild -j "{'ID': '$AWSSecretAccessKey'}" | jq -r '.Result | .SecretText' >> $centrifycc_deploy_dir/deploy.log 2>&1
-    
-# DIAGS
     
 if ! ${CENTRIFY_CCLI_BIN} /ServerManage/RetrieveSecretContents -s -m -ms postbuild -j "{'ID': '$AWSAccessKeyID'}" | jq -r '.Result | .SecretText' >> ~root/.aws/credentials
 then
@@ -276,14 +269,13 @@ if ! ${CENTRIFY_CCLI_BIN} /ServerManage/RetrieveSecretContents -s -m -ms postbui
 then
     echo 'postbuild: failed to write AWSSecretAccessKey to ~root/.aws/credentials' >> $centrifycc_deploy_dir/deploy.log 2>&1;exit 1
 else
-    cat ~root/.aws/credentials >> $centrifycc_deploy_dir/deploy.log 2>&1
     chmod 400 ~root/.aws/credentials
     echo 'postbuild: ~root/.aws/credentials created OK' >> $centrifycc_deploy_dir/deploy.log 2>&1
 fi
 
-if ! aws ec2 create-tags --resources $InstanceID --tags Key=ASGroup,value=CentrifyUnix >> $centrifycc_deploy_dir/deploy.log 2>&1;
+if ! aws ec2 create-tags --resources $InstanceID --tags Key=ASGroup,Value=CentrifyUnix >> $centrifycc_deploy_dir/deploy.log 2>&1;
 then
-    echo 'postbuild: aws cli failed to write EC2 SSM tag on $InstanceID [Key=ASGroup,value=CentrifyUnix]' >> $centrifycc_deploy_dir/deploy.log 2>&1;exit 1
+    echo 'postbuild: aws cli failed to write EC2 SSM tag on $InstanceID [Key=ASGroup,Value=CentrifyUnix]' >> $centrifycc_deploy_dir/deploy.log 2>&1;exit 1
 else
     echo 'postbuild: aws cli wrote EC2 SSM tag on $InstanceID' >> $centrifycc_deploy_dir/deploy.log 2>&1
     curl -X POST -H 'Content-type: application/json' --data '{"text":"AWS instance '${InstanceID}' has been enrolled in PAS Vault"}' ${SlackURL}
