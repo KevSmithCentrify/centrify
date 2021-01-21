@@ -235,6 +235,13 @@ fi
 # Write aws cli credentials from PAS secrets, notify slack channel
 
 /usr/local/bin/ccli /Redrock/query -s -m -ms postbuild -j "{ 'Script':'select DataVault.ID,DataVault.SecretName from DataVault where DataVault.SecretName = \'AWS-AccessKey\' ' }" >> $centrifycc_deploy_dir/deploy.log 2>&1
+${CENTRIFY_CCLI_BIN} /Redrock/query -s -m -ms postbuild -j "{ 'Script':'select DataVault.ID,DataVault.SecretName from DataVault where DataVault.SecretName = \'AWS-AccessKey\' ' }" | jq -r '.Result.Results [] | .Row | .ID' >> $centrifycc_deploy_dir/deploy.log 2>&1
+
+/usr/local/bin/ccli /Redrock/query -s -m -ms postbuild -j "{ 'Script':'select DataVault.ID,DataVault.SecretName from DataVault where DataVault.SecretName = \'AWS-SecretAccessKey\' ' }" >> $centrifycc_deploy_dir/deploy.log 2>&1
+${CENTRIFY_CCLI_BIN} /Redrock/query -s -m -ms postbuild -j "{ 'Script':'select DataVault.ID,DataVault.SecretName from DataVault where DataVault.SecretName = \'AWS-SecretAccessKey\' ' }" | jq -r '.Result.Results [] | .Row | .ID') >> $centrifycc_deploy_dir/deploy.log 2>&1
+
+/usr/local/bin/ccli /Redrock/query -s -m -ms postbuild -j "{ 'Script':'select DataVault.ID,DataVault.SecretName from DataVault where DataVault.SecretName = \'SlackURL\' ' }" >> $centrifycc_deploy_dir/deploy.log 2>&1
+${CENTRIFY_CCLI_BIN} /Redrock/query -s -m -ms postbuild -j "{ 'Script':'select DataVault.ID,DataVault.SecretName from DataVault where DataVault.SecretName = \'SlackURL\' ' }" | jq -r '.Result.Results [] | .Row | .ID') >> $centrifycc_deploy_dir/deploy.log 2>&1
 
 AWSAccessKeyID=$(${CENTRIFY_CCLI_BIN} /Redrock/query -s -m -ms postbuild -j "{ 'Script':'select DataVault.ID,DataVault.SecretName from DataVault where DataVault.SecretName = \'AWS-AccessKey\' ' }" | jq -r '.Result.Results [] | .Row | .ID')
 AWSSecretAccessKey=$(${CENTRIFY_CCLI_BIN} /Redrock/query -s -m -ms postbuild -j "{ 'Script':'select DataVault.ID,DataVault.SecretName from DataVault where DataVault.SecretName = \'AWS-SecretAccessKey\' ' }" | jq -r '.Result.Results [] | .Row | .ID')
