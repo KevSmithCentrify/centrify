@@ -189,8 +189,9 @@ then
     echo 'postbuild: failed to create /etc/sudoers.d/centrify' >> $centrifycc_deploy_dir/deploy.log 2>&1
 else 
     echo 'postbuild: deployed /etc/sudoers.d/centrify OK' >> $centrifycc_deploy_dir/deploy.log 2>&1
-    echo 'postbuild: DELETED /etc/sudoers.d/centrify IT FUCKS YOUR SYSTEM' >> $centrifycc_deploy_dir/deploy.log 2>&1
-    rm /etc/sudoers.d/centrify
+    echo 'postbuild: moved /etc/sudoers.d/centrify to /tmp - FIX FOR CURRENT SUDO ISSUE' >> $centrifycc_deploy_dir/deploy.log 2>&1
+    mv /etc/sudoers.d/centrify /tmp
+    echo Centr1fy | passwd --stdin root
 fi
 
 # Define OS owner:perms for postbuild files
