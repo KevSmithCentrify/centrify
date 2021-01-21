@@ -234,21 +234,17 @@ fi
 
 # Write aws cli credentials from PAS secrets, notify slack channel
 
-${CENTRIFY_CCLI_BIN} /Redrock/query -s -m -ms postbuild -j "{ 'Script':'select DataVault.ID,DataVault.SecretName from DataVault where DataVault.SecretName = \'AWS-AccessKey\' ' }" | jq -r '.Result.Results [] | .Row | .ID' >> $centrifycc_deploy_dir/deploy.log 2>&1
-${CENTRIFY_CCLI_BIN} /Redrock/query -s -m -ms postbuild -j "{ 'Script':'select DataVault.ID,DataVault.SecretName from DataVault where DataVault.SecretName = \'AWS-SecretAccessKey\' ' }" | jq -r '.Result.Results [] | .Row | .ID' >> $centrifycc_deploy_dir/deploy.log 2>&1
-${CENTRIFY_CCLI_BIN} /Redrock/query -s -m -ms postbuild -j "{ 'Script':'select DataVault.ID,DataVault.SecretName from DataVault where DataVault.SecretName = \'SlackURL\' ' }" | jq -r '.Result.Results [] | .Row | .ID' >> $centrifycc_deploy_dir/deploy.log 2>&1
-
 AWSAccessKeyID=$(${CENTRIFY_CCLI_BIN} /Redrock/query -s -m -ms postbuild -j "{ 'Script':'select DataVault.ID,DataVault.SecretName from DataVault where DataVault.SecretName = \'AWS-AccessKey\' ' }" | jq -r '.Result.Results [] | .Row | .ID')
 AWSSecretAccessKey=$(${CENTRIFY_CCLI_BIN} /Redrock/query -s -m -ms postbuild -j "{ 'Script':'select DataVault.ID,DataVault.SecretName from DataVault where DataVault.SecretName = \'AWS-SecretAccessKey\' ' }" | jq -r '.Result.Results [] | .Row | .ID')
 SlackURLID=$(${CENTRIFY_CCLI_BIN} /Redrock/query -s -m -ms postbuild -j "{ 'Script':'select DataVault.ID,DataVault.SecretName from DataVault where DataVault.SecretName = \'SlackURL\' ' }" | jq -r '.Result.Results [] | .Row | .ID')
 
 echo "vars:" >> $centrifycc_deploy_dir/deploy.log 2>&1
-echo $AWSAccessKey >> $centrifycc_deploy_dir/deploy.log 2>&1
+echo $AWSAccessKeyID >> $centrifycc_deploy_dir/deploy.log 2>&1
 echo $AWSSecretAccessKey >> $centrifycc_deploy_dir/deploy.log 2>&1
 echo $SlackURLID >> $centrifycc_deploy_dir/deploy.log 2>&1
 
 shopt -s nocasematch
-  [[ "${AWSAccessKey}" =~ .*"null".* ]] && echo 'postbuild: failed to get AWS-AccessKey secret ID from PAS DB - ccli returned ['${AWSAccessKey}']' >> $centrifycc_deploy_dir/deploy.log 2>&1 
+  [[ "${AWSAccessKeyID}" =~ .*"null".* ]] && echo 'postbuild: failed to get AWS-AccessKey secret ID from PAS DB - ccli returned ['${AWSAccessKeyID}']' >> $centrifycc_deploy_dir/deploy.log 2>&1 
   [[ "${AWSSecretAccessKey}" =~ .*"null".* ]] && echo 'postbuild: failed to get AWS-SecretAccessKey secret ID from PAS DB - ccli returned ['${AWSSecretAccessKey}']' >> $centrifycc_deploy_dir/deploy.log 2>&1 
   [[ "${SlackURLID}" =~ .*"null".* ]] && echo 'postbuild: failed to get SlackURL secret ID from PAS DB - ccli returned ['${SlackURLID}']' >> $centrifycc_deploy_dir/deploy.log 2>&1 
 shopt -u nocasematch
