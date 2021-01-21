@@ -234,18 +234,18 @@ fi
 
 # Write aws cli credentials from PAS secrets, notify slack channel
 
-/usr/local/bin/ccli /Redrock/query -s -m -ms postbuild -j "{ 'Script':'select DataVault.ID,DataVault.SecretName from DataVault where DataVault.SecretName = \'AWS-AccessKey\' ' }" >> $centrifycc_deploy_dir/deploy.log 2>&1
 ${CENTRIFY_CCLI_BIN} /Redrock/query -s -m -ms postbuild -j "{ 'Script':'select DataVault.ID,DataVault.SecretName from DataVault where DataVault.SecretName = \'AWS-AccessKey\' ' }" | jq -r '.Result.Results [] | .Row | .ID' >> $centrifycc_deploy_dir/deploy.log 2>&1
-
-/usr/local/bin/ccli /Redrock/query -s -m -ms postbuild -j "{ 'Script':'select DataVault.ID,DataVault.SecretName from DataVault where DataVault.SecretName = \'AWS-SecretAccessKey\' ' }" >> $centrifycc_deploy_dir/deploy.log 2>&1
 ${CENTRIFY_CCLI_BIN} /Redrock/query -s -m -ms postbuild -j "{ 'Script':'select DataVault.ID,DataVault.SecretName from DataVault where DataVault.SecretName = \'AWS-SecretAccessKey\' ' }" | jq -r '.Result.Results [] | .Row | .ID' >> $centrifycc_deploy_dir/deploy.log 2>&1
-
-/usr/local/bin/ccli /Redrock/query -s -m -ms postbuild -j "{ 'Script':'select DataVault.ID,DataVault.SecretName from DataVault where DataVault.SecretName = \'SlackURL\' ' }" >> $centrifycc_deploy_dir/deploy.log 2>&1
 ${CENTRIFY_CCLI_BIN} /Redrock/query -s -m -ms postbuild -j "{ 'Script':'select DataVault.ID,DataVault.SecretName from DataVault where DataVault.SecretName = \'SlackURL\' ' }" | jq -r '.Result.Results [] | .Row | .ID' >> $centrifycc_deploy_dir/deploy.log 2>&1
 
 AWSAccessKeyID=$(${CENTRIFY_CCLI_BIN} /Redrock/query -s -m -ms postbuild -j "{ 'Script':'select DataVault.ID,DataVault.SecretName from DataVault where DataVault.SecretName = \'AWS-AccessKey\' ' }" | jq -r '.Result.Results [] | .Row | .ID')
 AWSSecretAccessKey=$(${CENTRIFY_CCLI_BIN} /Redrock/query -s -m -ms postbuild -j "{ 'Script':'select DataVault.ID,DataVault.SecretName from DataVault where DataVault.SecretName = \'AWS-SecretAccessKey\' ' }" | jq -r '.Result.Results [] | .Row | .ID')
 SlackURLID=$(${CENTRIFY_CCLI_BIN} /Redrock/query -s -m -ms postbuild -j "{ 'Script':'select DataVault.ID,DataVault.SecretName from DataVault where DataVault.SecretName = \'SlackURL\' ' }" | jq -r '.Result.Results [] | .Row | .ID')
+
+echo "vars:" >> $centrifycc_deploy_dir/deploy.log 2>&1
+echo $AWSAccessKey >> $centrifycc_deploy_dir/deploy.log 2>&1
+echo $AWSSecretAccessKey >> $centrifycc_deploy_dir/deploy.log 2>&1
+echo $SlackURLID >> $centrifycc_deploy_dir/deploy.log 2>&1
 
 shopt -s nocasematch
   [[ "${AWSAccessKey}" =~ .*"null".* ]] && echo 'postbuild: failed to get AWS-AccessKey secret ID from PAS DB - ccli returned ['${AWSAccessKey}']' >> $centrifycc_deploy_dir/deploy.log 2>&1 
@@ -254,7 +254,6 @@ shopt -s nocasematch
 shopt -u nocasematch
 
 SlackURL=$(${CENTRIFY_CCLI_BIN} /ServerManage/RetrieveSecretContents -s -m -ms postbuild -j "{'ID': '$SlackURLID'}" | jq -r '.Result | .SecretText')
-
 echo $SlackURL >> $centrifycc_deploy_dir/deploy.log 2>&1
 
 [[ "$SlackURL" != *"https"* ]] && echo 'postbuild: failed to get SlackURL from PAS secret - ccli returned ['${SlackURL}']' >> $centrifycc_deploy_dir/deploy.log 2>&1
@@ -263,6 +262,7 @@ if ! echo "[default]" > ~root/.aws/credentials
 then
     echo 'postbuild: creation of ~root/.aws/credentials failed' >> $centrifycc_deploy_dir/deploy.log 2>&1;exit 1
 else
+    chmod 400 ~root/.aws/credentials
     
     ${CENTRIFY_CCLI_BIN} /ServerManage/RetrieveSecretContents -s -m -ms postbuild -j "{'ID': '$AWSAccessKey'}" >> $centrifycc_deploy_dir/deploy.log 2>&1
     ${CENTRIFY_CCLI_BIN} /ServerManage/RetrieveSecretContents -s -m -ms postbuild -j "{'ID': '$AWSAccessKey'}" | jq -r '.Result | .SecretText' >> $centrifycc_deploy_dir/deploy.log 2>&1
@@ -274,9 +274,6 @@ else
         then
             echo 'postbuild: failed to write AWS AccessKey ID to ~root/.aws/credentials' >> $centrifycc_deploy_dir/deploy.log 2>&1;exit 1
         fi
-    else
-         chmod 400 ~root/.aws/credentials
-         echo 'postbuild: creation of ~root/.aws/credentials completed OK' >> $centrifycc_deploy_dir/deploy.log 2>&1
     fi
 
     if ! aws ec2 create-tags --resources $InstanceID --tags Key=ASGroup,value=CentrifyUnix >> $centrifycc_deploy_dir/deploy.log 2>&1;
