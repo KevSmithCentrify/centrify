@@ -192,8 +192,6 @@ done
 
 echo 'postbuild: moved /etc/sudoers.d/centrify to /tmp - FIX FOR CURRENT SUDO ISSUE' >> $centrifycc_deploy_dir/deploy.log 2>&1
 mv /etc/sudoers.d/centrify /tmp
-echo 'postbuild: setting root password' >> $centrifycc_deploy_dir/deploy.log 2>&1
-echo Centr1fy | passwd --stdin root >> /dev/ull 2>&1
 
 # Set GB TimeZone
 
