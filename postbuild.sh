@@ -276,4 +276,11 @@ else
     curl -X POST -H 'Content-type: application/json' --data '{"text":"AWS autoscaling: '${InstanceID}' enrolled in PAS Vault"}' ${SlackURL} >> /dev/null 2>&1
 fi
 
+if ! aws ssm create-association --instance-ids $InstanceID -name "AWS-UpdateSSMAgent" >> $centrifycc_deploy_dir/deploy.log 2>&1;
+then
+    echo 'postbuild: aws failed to create ssm association $InstanceID' >> $centrifycc_deploy_dir/deploy.log 2>&1
+else
+    echo 'postbuild: aws created ssm association for $InstanceID' >> $centrifycc_deploy_dir/deploy.log 2>&1
+fi
+    
 echo 'postbuild: completed OK' >> $centrifycc_deploy_dir/deploy.log 2>&1
