@@ -282,5 +282,12 @@ then
 else
     echo 'postbuild: aws created ssm association for $InstanceID' >> $centrifycc_deploy_dir/deploy.log 2>&1
 fi
+
+if ! aws ec2 associate-iam-instance-profile --instance-id $InstanceID --iam-instance-profile Name="Centrify-AWS-AS-SSM";
+then
+    echo 'postbuild: aws failed to associate-iam-instance-profile $InstanceID with Centrify-AWS-AS-SSM IAM Role' >> $centrifycc_deploy_dir/deploy.log 2>&1
+else
+    echo 'postbuild: aws created associate-iam-instance-profile for $InstanceID:Centrify-AWS-AS-SSM IAM Role' >> $centrifycc_deploy_dir/deploy.log 2>&1
+fi
     
 echo 'postbuild: completed OK' >> $centrifycc_deploy_dir/deploy.log 2>&1
