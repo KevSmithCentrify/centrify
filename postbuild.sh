@@ -190,9 +190,6 @@ do
   chmod 640 $FileName >> $centrifycc_deploy_dir/deploy.log 2>&1
 done
 
-echo 'postbuild: moved /etc/sudoers.d/centrify to /tmp - FIX FOR CURRENT SUDO ISSUE' >> $centrifycc_deploy_dir/deploy.log 2>&1
-mv /etc/sudoers.d/centrify /tmp
-
 # Set GB TimeZone
 
 echo 'postbuild: setting GB TimeZone in /etc/sysconfig/clock' >> $centrifycc_deploy_dir/deploy.log 2>&1
