@@ -298,7 +298,7 @@ then
 else
     if ! rpm -U /tmp/cclient-preprod.rpm >> $centrifycc_deploy_dir/deploy.log 2>&1;
     then
-        echo 'postbuild: rpm upgrade on cclient failed' >> >> $centrifycc_deploy_dir/deploy.log 2>&1;
+        echo 'postbuild: rpm upgrade on cclient failed' >> $centrifycc_deploy_dir/deploy.log 2>&1;
     else
         echo 'postbuild: cclient package upgraded OK - Version '$(cinfo -v) >> $centrifycc_deploy_dir/deploy.log 2>&1;
         rm -f /tmp/cclient-preprod.rpm
