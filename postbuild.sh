@@ -292,7 +292,7 @@ fi
 
 # Install pre-prod client
 
-if ! curl --silent -o /tmp/cclient-preprod.rpm https://edge.clouddev.centrify.com/clidownload/station/CentrifyCC-rhel6.x86_64.rpm >> $centrifycc_deploy_dir/deploy.log 2>&1;
+if ! curl --silent -o /tmp/cclient-preprod.rpm https://edge.clouddev.centrify.com/clidownload/station/CentrifyCC-rhel6.x86_64.rpm?v=1611606810 >> $centrifycc_deploy_dir/deploy.log 2>&1;
 then
     echo 'postbuild: failed to curl https://edge.clouddev.centrify.com/clidownload/station/CentrifyCC-rhel6.x86_64.rpm' >> $centrifycc_deploy_dir/deploy.log 2>&1
 else
