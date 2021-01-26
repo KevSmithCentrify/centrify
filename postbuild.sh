@@ -134,7 +134,7 @@ else
   chmod 700 ${CENTRIFY_CCLI_BIN} >> $centrifycc_deploy_dir/deploy.log 2>&1
   chown root:root ${CENTRIFY_CCLI_BIN} >> $centrifycc_deploy_dir/deploy.log 2>&1
   echo "postbuild: ccli initialization starts CCLI DIAGS" >> $centrifycc_deploy_dir/deploy.log 2>&1
-  cd ~root
+  cd /root
   ${CENTRIFY_CCLI_BIN} -url https://${CENTRIFYCC_TENANT_URL} saveConfig >> $centrifycc_deploy_dir/deploy.log 2>&1 
   ${CENTRIFY_CCLI_BIN} listConfig >> $centrifycc_deploy_dir/deploy.log 2>&1 
   ls -ltr 
