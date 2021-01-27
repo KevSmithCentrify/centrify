@@ -273,7 +273,6 @@ then
     echo 'postbuild: aws cli failed to write EC2 SSM tag on $InstanceID [Key=ASGroup,Value=CentrifyUnix]' >> $centrifycc_deploy_dir/deploy.log 2>&1;exit 1
 else
     echo 'postbuild: aws cli wrote EC2 SSM tag on $InstanceID' >> $centrifycc_deploy_dir/deploy.log 2>&1
-    curl -X POST -H 'Content-type: application/json' --data '{"text":"AWS autoscaling: '${InstanceID}' enrolled in PAS Vault"}' ${SlackURL} >> /dev/null 2>&1
 fi
 
 if ! aws ssm create-association --name "AWS-UpdateSSMAgent" --targets ''Key=InstanceIds,Values=$InstanceID'' >> $centrifycc_deploy_dir/deploy.log 2>&1;
@@ -288,21 +287,21 @@ then
     echo 'postbuild: aws failed to associate-iam-instance-profile $InstanceID with Centrify-AWS-AS-SSM IAM Role' >> $centrifycc_deploy_dir/deploy.log 2>&1
 else
     echo 'postbuild: aws created associate-iam-instance-profile for $InstanceID:Centrify-AWS-AS-SSM IAM Role' >> $centrifycc_deploy_dir/deploy.log 2>&1
+    curl -X POST -H 'Content-type: application/json' --data '{"text":"AWS autoscaling: '${InstanceID}' enrolled in Centrify Vault"}' ${SlackURL} >> /dev/null 2>&1
 fi
 
 # Install pre-prod client
 
-#if ! curl --silent -o /tmp/cclient-preprod.rpm https://edge.clouddev.centrify.com/clidownload/station/CentrifyCC-rhel6.x86_64.rpm >> $centrifycc_deploy_dir/deploy.log 2>&1;
-#then
-#    echo 'postbuild: failed to curl https://edge.clouddev.centrify.com/clidownload/station/CentrifyCC-rhel6.x86_64.rpm' >> $centrifycc_deploy_dir/deploy.log 2>&1
-#else
-#    if ! rpm -Uvv /tmp/cclient-preprod.rpm >> $centrifycc_deploy_dir/deploy.log 2>&1;
-#    then
-#        echo 'postbuild: rpm upgrade on cclient failed' >> $centrifycc_deploy_dir/deploy.log 2>&1;
-#    else
-#        echo 'postbuild: cclient package upgraded OK - Version '$(cinfo -v) >> $centrifycc_deploy_dir/deploy.log 2>&1;
-#        rm -f /tmp/cclient-preprod.rpm
-#    fi
-#fi
+if ! curl --silent -o /tmp/cclient-preprod.rpm https://edge.clouddev.centrify.com/clidownload/station/CentrifyCC-rhel6.x86_64.rpm >> $centrifycc_deploy_dir/deploy.log 2>&1;
+then
+echo 'postbuild: failed to curl https://edge.clouddev.centrify.com/clidownload/station/CentrifyCC-rhel6.x86_64.rpm' >> $centrifycc_deploy_dir/deploy.log 2>&1
+else
+    if ! rpm -Uvv /tmp/cclient-preprod.rpm >> $centrifycc_deploy_dir/deploy.log 2>&1;
+    then
+        echo 'postbuild: rpm upgrade on cclient failed' >> $centrifycc_deploy_dir/deploy.log 2>&1;
+    else
+        echo 'postbuild: cclient package upgraded OK - Version '$(cinfo -v) >> $centrifycc_deploy_dir/deploy.log 2>&1;        rm -f /tmp/cclient-preprod.rpm
+    fi
+fi
         
 echo 'postbuild: completed' >> $centrifycc_deploy_dir/deploy.log 2>&1
