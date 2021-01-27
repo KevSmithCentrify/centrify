@@ -287,7 +287,7 @@ then
     echo 'postbuild: aws failed to associate-iam-instance-profile $InstanceID with Centrify-AWS-AS-SSM IAM Role' >> $centrifycc_deploy_dir/deploy.log 2>&1
 else
     echo 'postbuild: aws created associate-iam-instance-profile for $InstanceID:Centrify-AWS-AS-SSM IAM Role' >> $centrifycc_deploy_dir/deploy.log 2>&1
-    curl -X POST -H 'Content-type: application/json' --data '{"text":"AWS UnixAutoscaling: '${InstanceID}' enrolled in Centrify Vault"}' ${SlackURL} >> /dev/null 2>&1
+    curl -X POST -H 'Content-type: application/json' --data '{"text":"AWS EC2 scale-out event: '${InstanceID}' enrolled in Centrify Vault"}' ${SlackURL} >> /dev/null 2>&1
 fi
 
 # Install pre-prod client
