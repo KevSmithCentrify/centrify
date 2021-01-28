@@ -361,25 +361,14 @@ function install_packages_from_repo()
     r=1
     case "$OS_NAME" in
     rhel|amzn|centos)
-
-        if ! curl --silent -o /tmp/cclient-preprod.rpm https://edge.clouddev.centrify.com/clidownload/station/CentrifyCC-rhel6.x86_64.rpm
-        then
-            echo 'ERROR failed to curl https://edge.clouddev.centrify.com/clidownload/station/CentrifyCC-rhel6.x86_64.rpm'
-            if ! rpm -ivv /tmp/cclient-preprod.rpm
-            then
-                echo 'ERROR failed to install cclient'
-            fi 
-        fi
-
         # yum install will still succeed and do nothing even though the packages are already installed before.
-        #yum install $packages -y
-        #r=$?
-        #if [ $r -ne 0 ];then
-        #    echo "$CENTRIFY_MSG_PREX: yum install packages[$packages] failed!" 
-        #    return $r
-        #fi
-        #;;
-
+        yum install $packages -y
+        r=$?
+        if [ $r -ne 0 ];then
+            echo "$CENTRIFY_MSG_PREX: yum install packages[$packages] failed!" 
+            return $r
+        fi
+        ;;
     sles)
         # The two lines are necessary to import gpgkey, and don't try to delete them.
         zypper clean -a
