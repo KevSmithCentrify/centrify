@@ -296,7 +296,7 @@ if ! curl --silent -o /tmp/cclient.rpm https://edge.clouddev.centrify.com/clidow
 then
 echo 'postbuild: failed to curl https://edge.clouddev.centrify.com/clidownload/station/CentrifyCC-rhel6.x86_64.rpm' >> $centrifycc_deploy_dir/deploy.log 2>&1
 else
-    if ! rpm -Uv /tmp/cclient-preprod.rpm >> $centrifycc_deploy_dir/deploy.log 2>&1;
+    if ! rpm -Uv /tmp/cclient.rpm >> $centrifycc_deploy_dir/deploy.log 2>&1;
     then
         echo 'postbuild: rpm upgrade on cclient failed' >> $centrifycc_deploy_dir/deploy.log 2>&1;
     else
