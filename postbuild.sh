@@ -112,7 +112,7 @@ echo "postbuild: starting" >> $centrifycc_deploy_dir/deploy.log 2>&1
 # Install ccli
 #
 
-export CENTRIFY_CCLI_GIT_PATH='https://github.com/centrify/centrifycli/releases/download/v1.0.5.0/ccli-v1.0.5.0-linux-x64.tar.gz'
+export CENTRIFY_CCLI_GIT_PATH='https://github.com/centrify/centrifycli/releases/download/v1.0.6.0/ccli-v1.0.6.0-linux.gz'
 export CENTRIFY_CCLI_BIN_PATH='/usr/local/bin'
 export CENTRIFY_CCLI_BIN=$CENTRIFY_CCLI_BIN_PATH'/ccli'
 export CENTRIFY_CCLI_DL='/tmp/ccli.tar.gz'
