@@ -109,37 +109,42 @@ fi
 echo "postbuild: starting" >> $centrifycc_deploy_dir/deploy.log 2>&1
 
 #
-# Install ccli
+# Install ccli - Jan 2021 Moved to gunzip
 #
 
 export CENTRIFY_CCLI_GIT_PATH='https://github.com/centrify/centrifycli/releases/download/v1.0.6.0/ccli-v1.0.6.0-linux.gz'
 export CENTRIFY_CCLI_BIN_PATH='/usr/local/bin'
 export CENTRIFY_CCLI_BIN=$CENTRIFY_CCLI_BIN_PATH'/ccli'
-export CENTRIFY_CCLI_DL='/tmp/ccli.tar.gz'
+export CENTRIFY_CCLI_DL='/tmp/ccli-v1.0.6.0-linux.gz'
+export CENTRIFY_CCLI_UNZIP='/tmp/ccli-v1.0.6.0-linux'
 
-if ! curl --silent --fail -o ${CENTRIFY_CCLI_DL} -L ${CENTRIFY_CCLI_GIT_PATH} >> $centrifycc_deploy_dir/deploy.log 2>&1;
+if ! curl --silent --fail -o ${CENTRIFY_CCLI_DL} -L ${CENTRIFY_CCLI_GIT_PATH};
 then
-  echo "curl download of ccli failed" >> $centrifycc_deploy_dir/deploy.log 2>&1 
-  exit 1
-else
-  echo "postbuild: "${CENTRIFY_CCLI}" bundle created from "${CENTRIFY_CCLI_GIT_PATH} >> $centrifycc_deploy_dir/deploy.log 2>&1 
+    echo "postbuild: failed to curl DL ${CENTRIFY_CCLI_GIT_PATH}";
+    exit 1
 fi
 
-if ! tar -C ${CENTRIFY_CCLI_BIN_PATH} -xf ${CENTRIFY_CCLI_DL} >> $centrifycc_deploy_dir/deploy.log 2>&1;
+if ! gunzip ${CENTRIFY_CCLI_DL} >> $centrifycc_deploy_dir/deploy.log 2>&1;
 then
-  echo "postbuild: tar extract of ccli failed" >> $centrifycc_deploy_dir/deploy.log 2>&1
+  echo "postbuild: gunzip of ccli failed" >> $centrifycc_deploy_dir/deploy.log 2>&1 
   exit 1
-else 
-  echo "postbuild: ccli installed "${CENTRIFY_CCLI_BIN} >> $centrifycc_deploy_dir/deploy.log 2>&1
-  chmod 700 ${CENTRIFY_CCLI_BIN} >> $centrifycc_deploy_dir/deploy.log 2>&1
-  chown root:root ${CENTRIFY_CCLI_BIN} >> $centrifycc_deploy_dir/deploy.log 2>&1
-  echo "postbuild: ccli initialization starts CCLI DIAGS" >> $centrifycc_deploy_dir/deploy.log 2>&1
-  cd /root
-  ${CENTRIFY_CCLI_BIN} -url https://${CENTRIFYCC_TENANT_URL} saveConfig >> $centrifycc_deploy_dir/deploy.log 2>&1 
-  ${CENTRIFY_CCLI_BIN} listConfig >> $centrifycc_deploy_dir/deploy.log 2>&1 
-  ls -ltr 
-  rm -f ${CENTRIFY_CCLI_DL}
+else
+  if ! mv ${CENTRIFY_CCLI_UNZIP} ${CENTRIFY_CCLI_BIN};
+  then
+      echo "postbuild: unable to mv ${CENTRIFY_CCLI_UNZIP} ${CENTRIFY_CCLI_BIN}"
+  else
+      echo "postbuild: "${CENTRIFY_CCLI_UNZIP}" created from "${CENTRIFY_CCLI_GIT_PATH} >> $centrifycc_deploy_dir/deploy.log 2>&1 
+      echo "postbuild: ccli installed "${CENTRIFY_CCLI_BIN} >> $centrifycc_deploy_dir/deploy.log 2>&1
+      chmod 700 ${CENTRIFY_CCLI_BIN} >> $centrifycc_deploy_dir/deploy.log 2>&1
+      chown root:root ${CENTRIFY_CCLI_BIN} >> $centrifycc_deploy_dir/deploy.log 2>&1
+      echo "postbuild: ccli initialization starts CCLI DIAGS" >> $centrifycc_deploy_dir/deploy.log 2>&1
+      cd /root
+      ${CENTRIFY_CCLI_BIN} -url https://${CENTRIFYCC_TENANT_URL} saveConfig >> $centrifycc_deploy_dir/deploy.log 2>&1 
+      ${CENTRIFY_CCLI_BIN} listConfig >> $centrifycc_deploy_dir/deploy.log 2>&1 
+      ls -ltr 
+      rm -f ${CENTRIFY_CCLI_DL}
   echo "postbuild: ccli initialization completed" >> $centrifycc_deploy_dir/deploy.log 2>&1
+  fi
 fi
 
 #
