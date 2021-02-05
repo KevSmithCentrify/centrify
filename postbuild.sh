@@ -295,13 +295,17 @@ else
     curl -X POST -H 'Content-type: application/json' --data '{"text":"AWS EC2 LINUX scale-out event: '${InstanceID}' enrolled in Centrify Vault"}' ${SlackURL} >> /dev/null 2>&1
 fi
 
+echo 'postbuild: completed' >> $centrifycc_deploy_dir/deploy.log 2>&1
+
+exit
+
 # Install pre-prod client
 
 if ! curl --silent -o /tmp/CentrifyCC-rhel6.x86_642.rpm https://edge.clouddev.centrify.com/clidownload/station/CentrifyCC-rhel6.x86_64.rpm >> $centrifycc_deploy_dir/deploy.log 2>&1;
 then
 echo 'postbuild: failed to curl https://edge.clouddev.centrify.com/clidownload/station/CentrifyCC-rhel6.x86_64.rpm' >> $centrifycc_deploy_dir/deploy.log 2>&1
 else
-    if ! rpm -Uv /tmp/CentrifyCC-rhel6.x86_642.rpm >> $centrifycc_deploy_dir/deploy.log 2>&1;
+    if ! rpm -Uv /tmp/CentrifyCC-rhel6.x86_64.rpm >> $centrifycc_deploy_dir/deploy.log 2>&1;
     then
         echo 'postbuild: rpm upgrade on cclient failed' >> $centrifycc_deploy_dir/deploy.log 2>&1;
     else
